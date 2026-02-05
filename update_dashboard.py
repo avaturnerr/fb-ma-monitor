@@ -12,12 +12,13 @@ from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
 import json
 import re
+import time
 
 # Configuration
 ANTHROPIC_API_KEY = os.environ.get('ANTHROPIC_API_KEY')
 GMAIL_USER = os.environ.get('GMAIL_USER')
 GMAIL_APP_PASSWORD = os.environ.get('GMAIL_APP_PASSWORD')
-TO_EMAIL = "ava@westerra.com"  # CHANGE THIS TO YOUR EMAIL
+TO_EMAIL = "ava@westerracapital.com"  # CHANGE THIS TO YOUR EMAIL
 
 # Initialize Anthropic client
 client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
@@ -59,7 +60,7 @@ Be specific with company names, deal values, and dates."""
         # Make API call with web search enabled
         response = client.messages.create(
             model="claude-sonnet-4-20250514",
-            max_tokens=4000,
+            max_tokens=3000,
             tools=[{
                 "type": "web_search_20250305",
                 "name": "web_search"
@@ -77,6 +78,11 @@ Be specific with company names, deal values, and dates."""
                 summary += block.text + "\n"
         
         print("✅ Search complete!")
+        
+        # Add delay to avoid rate limits
+        print("⏳ Waiting to avoid rate limits...")
+        time.sleep(5)
+        
         return summary
         
     except Exception as e:
@@ -116,7 +122,7 @@ If no specific deals found, return empty array: []"""
     try:
         response = client.messages.create(
             model="claude-sonnet-4-20250514",
-            max_tokens=2000,
+            max_tokens=1500,
             messages=[{
                 "role": "user",
                 "content": parse_prompt

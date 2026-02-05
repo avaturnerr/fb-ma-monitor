@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food & Beverage M&A Monitoring Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: #2d3748;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #718096;
+            font-size: 16px;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .metric-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .metric-label {
+            color: #718096;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .metric-value {
+            color: #2d3748;
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .metric-change {
+            font-size: 14px;
+            color: #48bb78;
+        }
+
+        .metric-change.negative {
+            color: #f56565;
+        }
+
+        .section {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            color: #2d3748;
+            font-size: 24px;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .trend-item {
+            padding: 15px;
+            border-left: 4px solid #667eea;
+            background: #f7fafc;
+            margin-bottom: 15px;
+            border-radius: 5px;
+        }
+
+        .trend-title {
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 5px;
+        }
+
+        .trend-description {
+            color: #4a5568;
+            font-size: 14px;
+        }
+
+        .sources-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+        }
+
+        .source-item {
+            padding: 15px;
+            background: #edf2f7;
+            border-radius: 8px;
+            transition: background 0.3s ease;
+        }
+
+        .source-item:hover {
+            background: #e2e8f0;
+        }
+
+        .source-name {
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 5px;
+        }
+
+        .source-link {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .source-link:hover {
+            text-decoration: underline;
+        }
+
+        .deal-tracker {
+            margin-top: 20px;
+        }
+
+        .deal-entry {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 5px solid #48bb78;
+        }
+
+        .deal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 10px;
+        }
+
+        .deal-title {
+            font-weight: bold;
+            color: #2d3748;
+            font-size: 18px;
+        }
+
+        .deal-value {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .deal-details {
+            color: #4a5568;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .deal-category {
+            display: inline-block;
+            background: #bee3f8;
+            color: #2c5282;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+
+        .add-deal-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .add-deal-btn:hover {
+            background: #5a67d8;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 600px;
+            width: 90%;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2d3748;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a67d8;
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #2d3748;
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e0;
+        }
+
+        .hottest-categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .category-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🍽️ Food & Beverage M&A Monitor</h1>
+            <p class="subtitle">Real-time tracking of mergers & acquisitions in the F&B industry | Last updated: February 2026</p>
+        </div>
+
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-label">Q3 2025 Deals</div>
+                <div class="metric-value">72</div>
+                <div class="metric-change">↑ 20% QoQ</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Total Deal Value (H1 2025)</div>
+                <div class="metric-value">$103B</div>
+                <div class="metric-change">F&B sector</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">TTM Deals (Q3 '25)</div>
+                <div class="metric-value">260</div>
+                <div class="metric-change negative">↓ 4.4% YoY</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Market Size (2025)</div>
+                <div class="metric-value">$7.4T</div>
+                <div class="metric-change">↑ 6.3% growth</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🔥 Hottest Deal Categories</h2>
+            <div class="hottest-categories">
+                <div class="category-badge">Better-for-You</div>
+                <div class="category-badge">Protein Producers</div>
+                <div class="category-badge">Non-Alcoholic Beverages</div>
+                <div class="category-badge">Alcoholic Beverages</div>
+                <div class="category-badge">Functional Foods</div>
+                <div class="category-badge">Plant-Based</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📈 Key Market Trends (2025)</h2>
+            <div class="trend-item">
+                <div class="trend-title">🥤 Gut Health & Functional Beverages Boom</div>
+                <div class="trend-description">PepsiCo's $1.95B acquisition of Poppi signals major CPG interest in prebiotic sodas and functional drinks. This category seeing highest multiples.</div>
+            </div>
+            <div class="trend-item">
+                <div class="trend-title">💪 Protein Innovation Beyond Bars</div>
+                <div class="trend-description">Companies expanding protein into new formats. Celsius acquired Alani Nu for female-focused wellness drinks and supplements.</div>
+            </div>
+            <div class="trend-item">
+                <div class="trend-title">🌱 Clean Label & Health-Conscious</div>
+                <div class="trend-description">Flowers Foods acquired Simple Mills (gluten-free). Better-for-you category accounting for majority of deal flow.</div>
+            </div>
+            <div class="trend-item">
+                <div class="trend-title">📦 Portfolio Repositioning</div>
+                <div class="trend-description">Large FMCG divesting non-core assets. Strategic buyers dominating (76% of H1 deals). Creates PE opportunities.</div>
+            </div>
+            <div class="trend-item">
+                <div class="trend-title">🌍 Global Cuisine Expansion</div>
+                <div class="trend-description">Hispanic foods and international flavors seeing increased M&A interest as consumers seek authentic, diverse options.</div>
+            </div>
+            <div class="trend-item">
+                <div class="trend-title">⚖️ Regulatory Reshaping</div>
+                <div class="trend-description">FD&C Red No. 3 ban by 2027 forcing reformulation. Tariff impacts on 17% of US food supply creating cost pressures.</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>💎 Notable Deals (2025)</h2>
+            <div class="deal-tracker" id="dealTracker">
+                <div class="deal-entry">
+                    <div class="deal-header">
+                        <div class="deal-title">PepsiCo acquires Poppi</div>
+                        <div class="deal-value">$1.95B</div>
+                    </div>
+                    <div class="deal-details">Prebiotic soda brand tapping into gut health trend</div>
+                    <span class="deal-category">Functional Beverages</span>
+                    <span class="deal-category">Q1 2025</span>
+                </div>
+
+                <div class="deal-entry">
+                    <div class="deal-header">
+                        <div class="deal-title">Celsius acquires Alani Nu</div>
+                        <div class="deal-value">Undisclosed</div>
+                    </div>
+                    <div class="deal-details">Female-focused wellness drinks and supplements</div>
+                    <span class="deal-category">Energy Drinks</span>
+                    <span class="deal-category">Q1 2025</span>
+                </div>
+
+                <div class="deal-entry">
+                    <div class="deal-header">
+                        <div class="deal-title">Carlsberg acquires Britvic</div>
+                        <div class="deal-value">£3.3B</div>
+                    </div>
+                    <div class="deal-details">Major soft drinks portfolio expansion in UK</div>
+                    <span class="deal-category">Beverages</span>
+                    <span class="deal-category">Q3 2025</span>
+                </div>
+
+                <div class="deal-entry">
+                    <div class="deal-header">
+                        <div class="deal-title">Flowers Foods acquires Simple Mills</div>
+                        <div class="deal-value">Undisclosed</div>
+                    </div>
+                    <div class="deal-details">Gluten-free snacks and baking mixes</div>
+                    <span class="deal-category">Better-for-You</span>
+                    <span class="deal-category">Q1 2025</span>
+                </div>
+
+                <div class="deal-entry">
+                    <div class="deal-header">
+                        <div class="deal-title">Gryphon acquires Spindrift</div>
+                        <div class="deal-value">Undisclosed</div>
+                    </div>
+                    <div class="deal-details">Fast-growing sparkling water with clean-label appeal</div>
+                    <span class="deal-category">Beverages</span>
+                    <span class="deal-category">Q2 2025</span>
+                </div>
+
+                <div class="deal-entry">
+                    <div class="deal-header">
+                        <div class="deal-title">Global Eggs acquires Hillandale Farms</div>
+                        <div class="deal-value">Undisclosed</div>
+                    </div>
+                    <div class="deal-details">Brazilian buyer enters US organic and cage-free eggs market</div>
+                    <span class="deal-category">Protein</span>
+                    <span class="deal-category">Q1 2025</span>
+                </div>
+
+                <div class="deal-entry">
+                    <div class="deal-header">
+                        <div class="deal-title">Greencore / Bakkavor (potential)</div>
+                        <div class="deal-value">~£4B</div>
+                    </div>
+                    <div class="deal-details">Would create ready-meals powerhouse - under CMA review</div>
+                    <span class="deal-category">Ready Meals</span>
+                    <span class="deal-category">Pending</span>
+                </div>
+            </div>
+            <button class="add-deal-btn" onclick="openModal()">+ Track New Deal</button>
+        </div>
+
+        <div class="section">
+            <h2>📊 Data Sources & Research Tools</h2>
+            <div class="sources-list">
+                <div class="source-item">
+                    <div class="source-name">Kroll M&A Reports</div>
+                    <a href="https://www.kroll.com/en/publications/m-and-a" target="_blank" class="source-link">Quarterly F&B insights →</a>
+                </div>
+                <div class="source-item">
+                    <div class="source-name">The Food Institute</div>
+                    <a href="https://foodinstitute.com/" target="_blank" class="source-link">Industry news & reports →</a>
+                </div>
+                <div class="source-item">
+                    <div class="source-name">PMCF Investment Banking</div>
+                    <a href="https://pmcf.com/industry-updates/" target="_blank" class="source-link">Quarterly pulse reports →</a>
+                </div>
+                <div class="source-item">
+                    <div class="source-name">Grant Thornton</div>
+                    <a href="https://www.grantthornton.co.uk/" target="_blank" class="source-link">UK/EU F&B M&A reviews →</a>
+                </div>
+                <div class="source-item">
+                    <div class="source-name">Food Navigator</div>
+                    <a href="https://www.foodnavigator-usa.com/" target="_blank" class="source-link">Latest deal announcements →</a>
+                </div>
+                <div class="source-item">
+                    <div class="source-name">MCF Corporate Finance</div>
+                    <a href="https://www.mcfcorpfin.com/" target="_blank" class="source-link">European F&B activity →</a>
+                </div>
+                <div class="source-item">
+                    <div class="source-name">Baker Tilly</div>
+                    <a href="https://www.bakertilly.com/insights/" target="_blank" class="source-link">Industry updates →</a>
+                </div>
+                <div class="source-item">
+                    <div class="source-name">PitchBook</div>
+                    <a href="https://pitchbook.com/" target="_blank" class="source-link">Deal database & analytics →</a>
+                </div>
+                <div class="source-item">
+                    <div class="source-name">Mergermarket</div>
+                    <a href="https://www.mergermarket.com/" target="_blank" class="source-link">Real-time M&A intelligence →</a>
+                </div>
+                <div class="source-item">
+                    <div class="source-name">Capital IQ</div>
+                    <a href="https://www.spglobal.com/marketintelligence/" target="_blank" class="source-link">S&P Global platform →</a>
+                </div>
+                <div class="source-item">
+                    <div class="source-name">Food Dive</div>
+                    <a href="https://www.fooddive.com/" target="_blank" class="source-link">Daily industry news →</a>
+                </div>
+                <div class="source-item">
+                    <div class="source-name">Beverage Industry Magazine</div>
+                    <a href="https://www.bevindustry.com/" target="_blank" class="source-link">Beverage sector focus →</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🎯 Monitoring Strategy Recommendations</h2>
+            <div class="trend-item">
+                <div class="trend-title">Daily Sources</div>
+                <div class="trend-description">Food Navigator, Food Dive, LinkedIn company announcements</div>
+            </div>
+            <div class="trend-item">
+                <div class="trend-title">Weekly Review</div>
+                <div class="trend-description">PitchBook deal alerts, Mergermarket reports, trade publications</div>
+            </div>
+            <div class="trend-item">
+                <div class="trend-title">Quarterly Deep Dive</div>
+                <div class="trend-description">Kroll reports, Grant Thornton reviews, PMCF pulse reports, Baker Tilly updates</div>
+            </div>
+            <div class="trend-item">
+                <div class="trend-title">Key Search Terms</div>
+                <div class="trend-description">"food beverage M&A", "CPG acquisition", "[brand name] acquired", "functional beverage deal", "better-for-you acquisition"</div>
+            </div>
+            <div class="trend-item">
+                <div class="trend-title">Focus Categories to Watch</div>
+                <div class="trend-description">Gut health, protein innovation, plant-based, non-alcoholic spirits, Hispanic foods, clean-label snacking</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for adding new deals -->
+    <div id="dealModal" class="modal">
+        <div class="modal-content">
+            <h2>Track New Deal</h2>
+            <form id="dealForm">
+                <div class="form-group">
+                    <label for="dealTitle">Deal Title*</label>
+                    <input type="text" id="dealTitle" required placeholder="e.g., Company A acquires Company B">
+                </div>
+                <div class="form-group">
+                    <label for="dealValue">Deal Value</label>
+                    <input type="text" id="dealValue" placeholder="e.g., $500M or Undisclosed">
+                </div>
+                <div class="form-group">
+                    <label for="dealDetails">Deal Details*</label>
+                    <textarea id="dealDetails" rows="3" required placeholder="Brief description of the transaction"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="dealCategory">Category*</label>
+                    <select id="dealCategory" required>
+                        <option value="">Select category...</option>
+                        <option value="Better-for-You">Better-for-You</option>
+                        <option value="Protein">Protein</option>
+                        <option value="Beverages">Beverages</option>
+                        <option value="Functional Beverages">Functional Beverages</option>
+                        <option value="Energy Drinks">Energy Drinks</option>
+                        <option value="Alcoholic Beverages">Alcoholic Beverages</option>
+                        <option value="Plant-Based">Plant-Based</option>
+                        <option value="Ready Meals">Ready Meals</option>
+                        <option value="Snacking">Snacking</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="dealQuarter">Quarter</label>
+                    <input type="text" id="dealQuarter" placeholder="e.g., Q1 2026">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Deal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openModal() {
+            document.getElementById('dealModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('dealModal').style.display = 'none';
+            document.getElementById('dealForm').reset();
+        }
+
+        document.getElementById('dealForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const title = document.getElementById('dealTitle').value;
+            const value = document.getElementById('dealValue').value || 'Undisclosed';
+            const details = document.getElementById('dealDetails').value;
+            const category = document.getElementById('dealCategory').value;
+            const quarter = document.getElementById('dealQuarter').value || 'TBD';
+
+            const dealEntry = document.createElement('div');
+            dealEntry.className = 'deal-entry';
+            dealEntry.innerHTML = `
+                <div class="deal-header">
+                    <div class="deal-title">${title}</div>
+                    <div class="deal-value">${value}</div>
+                </div>
+                <div class="deal-details">${details}</div>
+                <span class="deal-category">${category}</span>
+                <span class="deal-category">${quarter}</span>
+            `;
+
+            document.getElementById('dealTracker').insertBefore(dealEntry, document.getElementById('dealTracker').firstChild);
+            
+            closeModal();
+        });
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('dealModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html>

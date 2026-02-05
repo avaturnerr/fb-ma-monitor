@@ -202,7 +202,7 @@ def send_email_digest(summary, deals):
         msg = MIMEMultipart('alternative')
         msg['Subject'] = f"F&B M&A Weekly Update - {datetime.now().strftime('%B %d, %Y')}"
         msg['From'] = GMAIL_USER
-        msg['To'] = TO_EMAIL
+        msg['To'] = ava@westerracapital.com
         
         # Create email body
         email_body = f"""

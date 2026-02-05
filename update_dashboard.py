@@ -242,7 +242,7 @@ FULL MARKET SUMMARY:
 {'=' * 50}
 
 📊 View your updated dashboard:
-https://github.com/YOUR-USERNAME/fb-ma-monitor/blob/main/fb_ma_monitoring_dashboard.html
+https://github.com/avaturnerr/fb-ma-monitor/blob/main/fb_ma_monitoring_dashboard.html
 
 💡 This is an automated weekly update. New deals are added to your dashboard automatically.
 

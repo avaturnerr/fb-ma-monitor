@@ -1,0 +1,46 @@
+name: Weekly F&B M&A Update
+
+on:
+  schedule:
+    # Runs every Friday at 9 AM EST (14:00 UTC)
+    - cron: '0 14 * * 5'
+  workflow_dispatch: # Allows manual triggering from GitHub UI
+
+jobs:
+  update-dashboard:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Run M&A update script
+      env:
+        ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        GMAIL_USER: ${{ secrets.GMAIL_USER }}
+        GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+      run: |
+        python update_dashboard.py
+        
+    - name: Commit updated dashboard
+      run: |
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        git add fb_ma_monitoring_dashboard.html
+        git diff --quiet && git diff --staged --quiet || git commit -m "Update F&B M&A dashboard - $(date +'%Y-%m-%d')"
+        
+    - name: Push changes
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: ${{ github.ref }}
